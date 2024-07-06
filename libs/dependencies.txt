@@ -1,0 +1,4 @@
+Static :-
+GLEW (64 bit)
+GLFW (64 bit)
+
