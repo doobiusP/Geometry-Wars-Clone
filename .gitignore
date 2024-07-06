@@ -1,4 +1,9 @@
-libs/*
+
 bin/
 obj/
 .vscode
+Makefile
+*.make
+TODO.txt
+**.lib
+**.a
