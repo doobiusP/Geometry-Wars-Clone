@@ -61,7 +61,12 @@ void Renderer::printPolygonData(int polyIndex)
     std::cout << "---------------------------------------------------------------\n";
 }
 
-Renderer::Renderer(int vMin, int vMax, float radius, const std::string &polyVertShader, const std::string &polyFragShader) : m_vStart{vMin}, m_vLength{vMax - vMin + 1}, m_radius{radius}, m_shader(polyVertShader, polyFragShader)
+Renderer::Renderer(int vMin, int vMax, float radius, int windowW, int windowH, const std::string &polyVertShader, const std::string &polyFragShader) : m_vStart{vMin},
+                                                                                                                                                       m_vLength{vMax - vMin + 1},
+                                                                                                                                                       m_radius{radius},
+                                                                                                                                                       m_shader(polyVertShader, polyFragShader),
+                                                                                                                                                       m_windowW{windowW},
+                                                                                                                                                       m_windowH{windowH}
 {
     m_polyData.resize(m_vLength);
     for (int i = 0; i < m_vLength; ++i)

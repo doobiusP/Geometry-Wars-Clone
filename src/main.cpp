@@ -5,6 +5,8 @@ int main(int argc, char *argv[])
 {
     int vMin, vMax;
     float radius;
+    const int SCR_WIDTH = 640;
+    const int SCR_HEIGHT = 480;
 
     std::cin >> vMin >> vMax >> radius;
     if (vMin < 3 || vMin > vMax || radius <= 0.0f)
@@ -20,7 +22,7 @@ int main(int argc, char *argv[])
         return -1;
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(1920, 1080, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -38,7 +40,7 @@ int main(int argc, char *argv[])
     std::string pathToVert = "shaders/polyplace.glsl";
     std::string pathToFrag = "shaders/polyfill.glsl";
 
-    Renderer simpleRenderer = Renderer(vMin, vMax, radius, pathToVert, pathToFrag);
+    Renderer simpleRenderer = Renderer(vMin, vMax, radius, SCR_WIDTH, SCR_HEIGHT, pathToVert, pathToFrag);
 
     std::random_device rd;
     std::mt19937 gen(rd());
