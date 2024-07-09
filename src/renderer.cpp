@@ -14,8 +14,8 @@ void Renderer::fillPolygonData(int polyIndex)
     for (int i = 0; i < n; ++i)
     {
         float angle = i * angleStep;
-        float x = r * cos(angle);
-        float y = r * sin(angle);
+        float x = (m_windowW / 2.0f) + r * cos(angle);
+        float y = (m_windowH / 2.0f) + r * sin(angle);
         polyN.push_back(x);
         polyN.push_back(y);
     }
@@ -31,8 +31,8 @@ void Renderer::fillPolygonData(int polyIndex)
         polyInd.push_back(nextIndex);
     }
 
-    polyN.push_back(0.0f);
-    polyN.push_back(0.0f);
+    polyN.push_back(m_windowW / 2.0f);
+    polyN.push_back(m_windowH / 2.0f);
 }
 
 void Renderer::printPolygonData(int polyIndex)
@@ -61,17 +61,19 @@ void Renderer::printPolygonData(int polyIndex)
     std::cout << "---------------------------------------------------------------\n";
 }
 
-Renderer::Renderer(int vMin, int vMax, float radius, int windowW, int windowH, const std::string &polyVertShader, const std::string &polyFragShader) : m_vStart{vMin},
-                                                                                                                                                       m_vLength{vMax - vMin + 1},
-                                                                                                                                                       m_radius{radius},
-                                                                                                                                                       m_shader(polyVertShader, polyFragShader),
-                                                                                                                                                       m_windowW{windowW},
-                                                                                                                                                       m_windowH{windowH}
+Renderer::Renderer(int vMin, int vMax, float radius, float windowW, float windowH, const std::string &polyVertShader, const std::string &polyFragShader) : m_vStart{vMin},
+                                                                                                                                                           m_vLength{vMax - vMin + 1},
+                                                                                                                                                           m_radius{radius},
+                                                                                                                                                           m_shader(polyVertShader, polyFragShader),
+                                                                                                                                                           m_windowW{windowW},
+                                                                                                                                                           m_windowH{windowH}
 {
+    m_orthoProj = glm::ortho(0.0f, m_windowW, m_windowH, 0.0f, -1.0f, 1.0f);
     m_polyData.resize(m_vLength);
     for (int i = 0; i < m_vLength; ++i)
     {
         fillPolygonData(i);
+        // printPolygonData(i);
     }
 
     m_lastPolyShape = -1;
@@ -87,12 +89,20 @@ Renderer::Renderer(int vMin, int vMax, float radius, int windowW, int windowH, c
     m_shader.use();
 }
 
-void Renderer::Draw(int vCount, glm::vec3 polyColor)
+void Renderer::Draw(int vCount, glm::vec3 polyColor, glm::vec2 polyPos, float rotAngle)
 {
     if (vCount < m_vStart || vCount >= m_vStart + m_vLength)
         return;
     vCount -= m_vStart;
+    glm::mat4 model = glm::mat4(1.0f);
 
+    model = glm::translate(model, glm::vec3(polyPos, 0.0f));
+    model = glm::rotate(model, rotAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::translate(model, glm::vec3(-m_windowW / 2, -m_windowH / 2, 0.0f));
+
+    glm::mat4 polyMVP = m_orthoProj * model;
+
+    m_shader.setMat4("u_MVP", polyMVP);
     m_shader.setVec3("u_polyColor", polyColor);
 
     if (m_lastPolyShape != vCount)

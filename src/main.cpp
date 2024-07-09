@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     double lastTime = glfwGetTime();
     double currTime;
 
-    std::cout << randVert << '\n';
+    // std::cout << randVert << '\n';
     while (!glfwWindowShouldClose(window))
     {
         currTime = glfwGetTime();
@@ -61,10 +61,11 @@ int main(int argc, char *argv[])
         {
             lastTime = currTime;
             randVert = dis(gen);
-            std::cout << randVert << '\n';
+            // std::cout << randVert << '\n';
         }
 
-        simpleRenderer.Draw(randVert, glm::vec3(0.1f, 0.6f, 0.2f));
+        simpleRenderer.Draw(3, glm::vec3(0.2f, 0.5f, 0.3f), glm::vec2(300, 100), -50 * glm::radians(currTime));
+        simpleRenderer.Draw(randVert, glm::vec3(0.1f, 0.6f, 0.2f), glm::vec2(100, 200), 200 * glm::radians(currTime));
         glfwSwapBuffers(window);
 
         glfwPollEvents();
