@@ -72,9 +72,11 @@ OBJECTS :=
 GENERATED += $(OBJDIR)/main.o
 GENERATED += $(OBJDIR)/renderer.o
 GENERATED += $(OBJDIR)/shaderclass.o
+GENERATED += $(OBJDIR)/window.o
 OBJECTS += $(OBJDIR)/main.o
 OBJECTS += $(OBJDIR)/renderer.o
 OBJECTS += $(OBJDIR)/shaderclass.o
+OBJECTS += $(OBJDIR)/window.o
 
 # Rules
 # #############################################
@@ -145,6 +147,9 @@ $(OBJDIR)/renderer.o: src/renderer.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/shaderclass.o: src/shaderclass.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/window.o: src/window.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

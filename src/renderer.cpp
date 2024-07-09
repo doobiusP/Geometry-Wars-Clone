@@ -61,12 +61,13 @@ void Renderer::printPolygonData(int polyIndex)
     std::cout << "---------------------------------------------------------------\n";
 }
 
-Renderer::Renderer(int vMin, int vMax, float radius, float windowW, float windowH, const std::string &polyVertShader, const std::string &polyFragShader) : m_vStart{vMin},
-                                                                                                                                                           m_vLength{vMax - vMin + 1},
-                                                                                                                                                           m_radius{radius},
-                                                                                                                                                           m_shader(polyVertShader, polyFragShader),
-                                                                                                                                                           m_windowW{windowW},
-                                                                                                                                                           m_windowH{windowH}
+Renderer::Renderer(int vMin, int vMax, float radius, float windowW, float windowH, const std::string &polyVertShader, const std::string &polyFragShader, const std::string &polyOutlineFragShader) : m_vStart{vMin},
+                                                                                                                                                                                                     m_vLength{vMax - vMin + 1},
+                                                                                                                                                                                                     m_radius{radius},
+                                                                                                                                                                                                     m_shader(polyVertShader, polyFragShader),
+                                                                                                                                                                                                     m_outlineShader(polyVertShader, polyOutlineFragShader),
+                                                                                                                                                                                                     m_windowW{windowW},
+                                                                                                                                                                                                     m_windowH{windowH}
 {
     m_orthoProj = glm::ortho(0.0f, m_windowW, m_windowH, 0.0f, -1.0f, 1.0f);
     m_polyData.resize(m_vLength);
@@ -86,7 +87,10 @@ Renderer::Renderer(int vMin, int vMax, float radius, float windowW, float window
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 
-    m_shader.use();
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
+
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); // For outlining
 }
 
 void Renderer::Draw(int vCount, glm::vec3 polyColor, glm::vec2 polyPos, float rotAngle)
@@ -94,6 +98,15 @@ void Renderer::Draw(int vCount, glm::vec3 polyColor, glm::vec2 polyPos, float ro
     if (vCount < m_vStart || vCount >= m_vStart + m_vLength)
         return;
     vCount -= m_vStart;
+    if (m_lastPolyShape != vCount)
+    {
+        glBufferData(GL_ARRAY_BUFFER, m_polyData[vCount].polyVertices.size() * sizeof(float), &m_polyData[vCount].polyVertices[0], GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_polyData[vCount].polyIndices.size() * sizeof(unsigned int), &m_polyData[vCount].polyIndices[0], GL_STATIC_DRAW);
+
+        m_lastPolyShape = vCount;
+    }
+
+    // -------------------- Shape ------------------------
     glm::mat4 model = glm::mat4(1.0f);
 
     model = glm::translate(model, glm::vec3(polyPos, 0.0f));
@@ -102,18 +115,35 @@ void Renderer::Draw(int vCount, glm::vec3 polyColor, glm::vec2 polyPos, float ro
 
     glm::mat4 polyMVP = m_orthoProj * model;
 
+    m_shader.use();
     m_shader.setMat4("u_MVP", polyMVP);
     m_shader.setVec3("u_polyColor", polyColor);
 
-    if (m_lastPolyShape != vCount)
-    {
-        glBufferData(GL_ARRAY_BUFFER, m_polyData[vCount].polyVertices.size() * sizeof(float), &m_polyData[vCount].polyVertices[0], GL_STATIC_DRAW);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_polyData[vCount].polyIndices.size() * sizeof(unsigned int), &m_polyData[vCount].polyIndices[0], GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
-        glEnableVertexAttribArray(0);
-
-        m_lastPolyShape = vCount;
-    }
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilMask(0xFF);
 
     glDrawElements(GL_TRIANGLES, m_polyData[vCount].polyIndices.size(), GL_UNSIGNED_INT, (void *)0);
+
+    //-------------------- Outline ------------------------
+
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(polyPos, 0.0f));
+    model = glm::rotate(model, rotAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::scale(model, glm::vec3(1.1f, 1.1f, 1.0f));
+    model = glm::translate(model, glm::vec3(-m_windowW / 2, -m_windowH / 2, 0.0f));
+
+    polyMVP = m_orthoProj * model;
+
+    m_outlineShader.use();
+    m_outlineShader.setMat4("u_MVP", polyMVP);
+
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilMask(0x00);
+    glDisable(GL_DEPTH_TEST);
+
+    glDrawElements(GL_TRIANGLES, m_polyData[vCount].polyIndices.size(), GL_UNSIGNED_INT, (void *)0);
+
+    glStencilMask(0xFF);
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glEnable(GL_DEPTH_TEST);
 }

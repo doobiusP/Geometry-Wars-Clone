@@ -26,12 +26,13 @@ private:
     int m_lastPolyShape;
 
     Shader m_shader;
+    Shader m_outlineShader;
 
     void fillPolygonData(int polyIndex);
     void printPolygonData(int polyIndex);
 
 public:
-    Renderer(int vMin, int vMax, float radius, float windowW, float windowH, const std::string &polyVertShader, const std::string &polyFragShader);
+    Renderer(int vMin, int vMax, float radius, float windowW, float windowH, const std::string &polyVertShader, const std::string &polyFragShader, const std::string &polyOutlineFragShader);
 
     void Draw(int vCount, glm::vec3 polyColor, glm::vec2 polyPos, float rotAngle);
 };
