@@ -16,8 +16,9 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-    GLFWwindow *window = initializeWindow(SCR_WIDTH, SCR_HEIGHT);
-    if (!window)
+    Window mainWin = Window(SCR_WIDTH, SCR_HEIGHT);
+
+    if (!mainWin.window)
     {
         std::cout << "Window failed to initialize!\n";
         exit(-1);
@@ -38,7 +39,7 @@ int main(int argc, char *argv[])
     double currTime;
 
     // std::cout << randVert << '\n';
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(mainWin.window))
     {
         currTime = glfwGetTime();
         glClearColor(0.2f, 0.3f, 0.1f, 1.0f);
@@ -53,7 +54,7 @@ int main(int argc, char *argv[])
 
         simpleRenderer.Draw(3, glm::vec3(0.2f, 0.5f, 0.3f), glm::vec2(300, 100), -50 * glm::radians(currTime));
         simpleRenderer.Draw(randVert, glm::vec3(0.1f, 0.6f, 0.2f), glm::vec2(300, 120), 200 * glm::radians(currTime));
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(mainWin.window);
 
         glfwPollEvents();
     }

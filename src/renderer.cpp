@@ -90,7 +90,7 @@ Renderer::Renderer(int vMin, int vMax, float radius, float windowW, float window
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
 
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); // For outlining
+    glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE); // For outlining
 }
 
 void Renderer::Draw(int vCount, glm::vec3 polyColor, glm::vec2 polyPos, float rotAngle)

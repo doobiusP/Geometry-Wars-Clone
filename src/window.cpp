@@ -24,3 +24,8 @@ GLFWwindow *initializeWindow(const float windowW, const float windowH)
 
     return window;
 }
+
+Window::Window(const float windowW, const float windowH)
+{
+    window = initializeWindow(windowW, windowH);
+}
