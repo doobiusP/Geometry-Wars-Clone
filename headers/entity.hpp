@@ -13,7 +13,8 @@ enum class ENTITY_TYPE
 class Entity
 {
 private:
-    friend class EntityManager;
+    // friend class EntityManager;
+    friend class EntityManager2;
 
     const size_t m_id;
     ENTITY_TYPE m_tag;
@@ -27,6 +28,13 @@ public:
     std::optional<CScore> cScore;
     std::optional<CLifespan> cLifespan;
     std::optional<CInput> cInput;
+
+    void addTransform(glm::vec2 p, glm::vec2 v, float a);
+    void addShape(int s, glm::vec3 c);
+    void addCollision(float r);
+    void addScore(int s);
+    void addLifeSpan(int t);
+    void addInput();
 
     const size_t getId() const;
     const ENTITY_TYPE getTag() const;

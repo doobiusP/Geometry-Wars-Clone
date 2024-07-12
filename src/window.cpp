@@ -1,6 +1,6 @@
 #include "window.hpp"
 
-GLFWwindow *initializeWindow(const float windowW, const float windowH)
+GLFWwindow *Window::initializeWindow(const float windowW, const float windowH)
 {
     if (!glfwInit())
         return nullptr;

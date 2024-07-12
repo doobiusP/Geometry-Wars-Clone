@@ -1,5 +1,6 @@
 #include "renderer.hpp"
 #include "window.hpp"
+#include "entitymanager.hpp"
 #include <random>
 
 int main(int argc, char *argv[])
@@ -16,7 +17,8 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-    Window mainWin = Window(SCR_WIDTH, SCR_HEIGHT);
+    Window mainWin{SCR_WIDTH, SCR_HEIGHT};
+    EntityManager2 manager{};
 
     if (!mainWin.window)
     {
@@ -28,7 +30,7 @@ int main(int argc, char *argv[])
     std::string pathToFrag = "shaders/polyfill.glsl";
     std::string pathToOutlineFrag = "shaders/polyoutline.glsl";
 
-    Renderer simpleRenderer = Renderer(vMin, vMax, radius, SCR_WIDTH, SCR_HEIGHT, pathToVert, pathToFrag, pathToOutlineFrag);
+    Renderer simpleRenderer{vMin, vMax, radius, SCR_WIDTH, SCR_HEIGHT, pathToVert, pathToFrag, pathToOutlineFrag};
 
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -38,7 +40,6 @@ int main(int argc, char *argv[])
     double lastTime = glfwGetTime();
     double currTime;
 
-    // std::cout << randVert << '\n';
     while (!glfwWindowShouldClose(mainWin.window))
     {
         currTime = glfwGetTime();
@@ -49,7 +50,6 @@ int main(int argc, char *argv[])
         {
             lastTime = currTime;
             randVert = dis(gen);
-            // std::cout << randVert << '\n';
         }
 
         simpleRenderer.Draw(3, glm::vec3(0.2f, 0.5f, 0.3f), glm::vec2(300, 100), -50 * glm::radians(currTime));

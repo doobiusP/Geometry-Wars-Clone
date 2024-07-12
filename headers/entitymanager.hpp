@@ -2,32 +2,32 @@
 #include "entity.hpp"
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
-using EntityVec = std::vector<Entity *>;
-using EntityMap = std::unordered_map<ENTITY_TYPE, EntityVec>;
+using EntityIDMap = std::unordered_map<size_t, Entity *>;
+using EntityTypeMap = std::unordered_map<ENTITY_TYPE, std::vector<size_t>>;
 
-class EntityManager
+class EntityManager2
 {
 private:
-    EntityVec m_entities;
-    EntityVec m_entitiesToAdd;
+    EntityIDMap m_entityMap;
+    EntityTypeMap m_entityTagList;
+    size_t m_totalEntities;
 
-    EntityMap m_entityMap;
-    size_t m_totalEntities = 0;
+    void destroyID(size_t id);
 
 public:
-    EntityManager() = default;
-    ~EntityManager();
+    EntityManager2();
+    ~EntityManager2();
 
-    EntityManager(const EntityManager &) = delete;
-    EntityManager &operator=(const EntityManager &) = delete;
-    EntityManager(EntityManager &&) = delete;
-    EntityManager &operator=(EntityManager &&) = delete;
+    const size_t createEntity(ENTITY_TYPE tag);
+    Entity *getEntityByID(size_t id);
+    void update();
+    const std::vector<size_t> &getEntities(ENTITY_TYPE tag) const;
 
-    void deferredUpdate();
-
-    Entity *addEntity(ENTITY_TYPE tag);
-
-    const EntityVec &getEntities() const;
-    const EntityVec &getEntities(ENTITY_TYPE tag) const;
+    // Just for Rule of 5
+    EntityManager2(const EntityManager2 &) = delete;
+    EntityManager2 &operator=(const EntityManager2 &) = delete;
+    EntityManager2(EntityManager2 &&) = delete;
+    EntityManager2 &operator=(EntityManager2 &&) = delete;
 };

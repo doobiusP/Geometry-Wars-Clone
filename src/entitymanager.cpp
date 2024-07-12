@@ -1,67 +1,59 @@
 #include "entitymanager.hpp"
 
-EntityManager::~EntityManager()
+void EntityManager2::destroyID(size_t id)
 {
-    for (const auto &e : m_entitiesToAdd)
+    auto &ref = m_entityTagList[m_entityMap[id]->getTag()];
+    ref.erase(std::remove(ref.begin(), ref.end(), id), ref.end());
+
+    delete m_entityMap[id];
+    m_entityMap.erase(id);
+}
+
+EntityManager2::EntityManager2() : m_totalEntities{0}
+{
+}
+
+EntityManager2::~EntityManager2()
+{
+    m_entityTagList.clear();
+    for (auto &e : m_entityMap)
     {
-        delete e;
+        delete e.second;
     }
 
-    m_entitiesToAdd.clear();
     m_entityMap.clear();
-
-    for (const auto &e : m_entities)
-    {
-        delete e;
-    }
-    m_entities.clear();
 }
 
-void EntityManager::deferredUpdate()
+const size_t EntityManager2::createEntity(ENTITY_TYPE tag)
 {
-    for (const auto &e : m_entitiesToAdd)
+    Entity *newEntity{new Entity(++m_totalEntities, tag)};
+
+    m_entityMap[m_totalEntities] = newEntity;
+    m_entityTagList[tag].push_back(m_totalEntities);
+
+    return m_totalEntities;
+}
+
+Entity *EntityManager2::getEntityByID(size_t id)
+{
+    return m_entityMap.contains(id) ? m_entityMap[id] : nullptr;
+}
+
+void EntityManager2::update()
+{
+    std::vector<size_t> idsToDelete;
+    for (const auto &e : m_entityMap)
     {
-        m_entities.push_back(e);
-        m_entityMap[e->getTag()].push_back(e);
+        if (!(e.second->isActive()))
+            idsToDelete.push_back(e.first);
     }
-
-    m_entitiesToAdd.clear();
-
-    for (auto &eVecPair : m_entityMap)
+    for (auto id : idsToDelete)
     {
-        EntityVec &eVec = eVecPair.second;
-        std::remove_if(eVec.begin(), eVec.end(), [](Entity *e)
-                       { return !e->isActive(); });
-    }
-
-    std::vector<Entity *> temp;
-    for (const auto &e : m_entities)
-    {
-        if (!e->isActive())
-            temp.push_back(e);
-    }
-    std::remove_if(m_entities.begin(), m_entities.end(), [](Entity *e)
-                   { return !e->isActive(); });
-
-    for (Entity *e : temp)
-    {
-        delete e;
+        destroyID(id);
     }
 }
 
-Entity *EntityManager::addEntity(ENTITY_TYPE tag)
+const std::vector<size_t> &EntityManager2::getEntities(ENTITY_TYPE tag) const
 {
-    Entity *e = new Entity(++m_totalEntities, tag);
-    m_entitiesToAdd.push_back(e);
-    return e;
-}
-
-const EntityVec &EntityManager::getEntities() const
-{
-    return m_entities;
-}
-
-const EntityVec &EntityManager::getEntities(ENTITY_TYPE tag) const
-{
-    return m_entityMap.at(tag);
+    return m_entityTagList.at(tag);
 }
