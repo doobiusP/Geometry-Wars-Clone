@@ -14,6 +14,7 @@ class Shader
 {
 public:
     GLuint ID;
+    Shader() = default;
     Shader(const std::string &pathToVertexShader, const std::string &pathToFragmentShader);
     ~Shader();
 
