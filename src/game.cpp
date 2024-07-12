@@ -1,6 +1,6 @@
 #include "game.hpp"
 
-Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_currentFrame{0}, m_lastEnemySpawnTime{0}, m_lastBulletSpawnTime{0}, m_paused{0}
+Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_currentFrame{0}, m_lastEnemySpawnTime{0}, m_lastBulletSpawnTime{0}, m_paused{0}, m_spaceKeyPressed{0}
 {
     std::ifstream config(pathToConfig);
     if (!config)
@@ -27,10 +27,17 @@ Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_current
     m_renderer = std::make_unique<Renderer>(m_vMin, m_vMax, m_standardRadius, m_windowW, m_windowH, pathToVert, pathToFrag, pathToOutlineFrag);
 
     spawnPlayer();
+
+    glfwSetWindowUserPointer(m_window.window, this);
+    glfwSetKeyCallback(m_window.window, keyCallback);
 }
 
 void Game::run()
 {
+    spawnEnemy();
+    spawnEnemy();
+    spawnEnemy();
+    spawnEnemy();
     spawnEnemy();
     spawnEnemy();
     float lastTime = static_cast<float>(glfwGetTime());
@@ -43,10 +50,12 @@ void Game::run()
         lastTime = currTime;
 
         m_manager.update();
-        sUserInput();
-        sMovement(deltaTime);
-
-        sCollision();
+        if (!m_paused)
+        {
+            sUserInput();
+            sMovement(deltaTime);
+            sCollision();
+        }
 
         sRender();
         glfwPollEvents();
@@ -105,15 +114,6 @@ void Game::sMovement(float deltaTime)
         playerMov.vel += glm::vec2(1.0f, 0.0f);
         playerInp.right = 0;
     }
-    if (playerInp.shoot && m_currentFrame - m_lastBulletSpawnTime >= 100)
-    {
-        double xpos, ypos;
-        glfwGetCursorPos(m_window.window, &xpos, &ypos);
-        spawnBullet(glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos)));
-
-        m_lastBulletSpawnTime = m_currentFrame;
-        playerInp.shoot = 0;
-    }
 
     if (playerMov.vel != glm::vec2(0.0f, 0.0f))
         playerMov.vel = glm::normalize(playerMov.vel);
@@ -142,9 +142,14 @@ void Game::sUserInput()
     {
         playerInp.right = 1;
     }
-    if (!playerInp.shoot && glfwGetKey(m_window.window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    if (m_spaceKeyPressed && m_currentFrame - m_lastBulletSpawnTime >= 15)
     {
-        playerInp.shoot = 1;
+        double xpos, ypos;
+        glfwGetCursorPos(m_window.window, &xpos, &ypos);
+        spawnBullet(glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos)));
+
+        m_lastBulletSpawnTime = m_currentFrame;
+        m_spaceKeyPressed = 0;
     }
 }
 
@@ -288,4 +293,34 @@ bool Game::checkCollision(size_t id1, size_t id2)
     Entity *e2 = m_manager.getEntityByID(id2);
 
     return glm::distance(e1->cTransform.value().pos, e2->cTransform.value().pos) <= 2 * m_standardRadius;
+}
+
+void Game::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    Game *game = static_cast<Game *>(glfwGetWindowUserPointer(window));
+    if (game)
+    {
+        game->handleKeyPress(key, action);
+    }
+}
+void Game::handleKeyPress(int key, int action)
+{
+    if (key == GLFW_KEY_SPACE)
+    {
+        if (action == GLFW_PRESS)
+        {
+            m_spaceKeyPressed = true;
+        }
+        else if (action == GLFW_RELEASE)
+        {
+            m_spaceKeyPressed = false;
+        }
+    }
+    if (key == GLFW_KEY_P)
+    {
+        if (action == GLFW_PRESS)
+        {
+            togglePause();
+        }
+    }
 }

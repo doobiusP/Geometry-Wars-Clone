@@ -27,6 +27,8 @@ private:
     float m_lastEnemySpawnTime;
     float m_lastBulletSpawnTime;
 
+    bool m_spaceKeyPressed;
+
     bool m_paused;
 
     int m_vMin;
@@ -55,4 +57,7 @@ private:
     void spawnBullet(const glm::vec2 &mousePos);
 
     bool checkCollision(size_t id1, size_t id2);
+
+    static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+    void handleKeyPress(int key, int action);
 };
