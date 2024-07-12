@@ -1,11 +1,9 @@
 #pragma once
-#include "renderer.hpp"
 #include "window.hpp"
 #include "entitymanager.hpp"
+#include "renderer.hpp"
 
 #include <random>
-#include <fstream>
-#include <iostream>
 
 class Game
 {
@@ -21,13 +19,19 @@ public:
 
 private:
     Window m_window;
-    EntityManager2 m_manager;
-    Renderer *m_renderer; // For some reason default constructor and copy assignment of Renderer is implicity deleted, so have to use dynamic allocation...
+    EntityManager m_manager;
+    Renderer *m_renderer; // Default constructor and copy assignment of Renderer is implicitly deleted, so having to use dynamic allocation...
+
     int m_score;
+
     int m_currentFrame;
     float m_lastEnemySpawnTime;
+
     bool m_paused;
     bool m_running;
+
+    std::mt19937 m_gen;
+    std::uniform_int_distribution<> m_rng;
 
     int m_vMin;
     int m_vMax;

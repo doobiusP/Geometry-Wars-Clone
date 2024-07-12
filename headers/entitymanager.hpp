@@ -7,7 +7,7 @@
 using EntityIDMap = std::unordered_map<size_t, Entity *>;
 using EntityTypeMap = std::unordered_map<ENTITY_TYPE, std::vector<size_t>>;
 
-class EntityManager2
+class EntityManager
 {
 private:
     EntityIDMap m_entityMap;
@@ -17,8 +17,8 @@ private:
     void destroyID(size_t id);
 
 public:
-    EntityManager2();
-    ~EntityManager2();
+    EntityManager();
+    ~EntityManager();
 
     const size_t createEntity(ENTITY_TYPE tag);
     Entity *getEntityByID(size_t id);
@@ -26,8 +26,8 @@ public:
     const std::vector<size_t> &getEntities(ENTITY_TYPE tag) const;
 
     // Just for Rule of 5
-    EntityManager2(const EntityManager2 &) = delete;
-    EntityManager2 &operator=(const EntityManager2 &) = delete;
-    EntityManager2(EntityManager2 &&) = delete;
-    EntityManager2 &operator=(EntityManager2 &&) = delete;
+    EntityManager(const EntityManager &) = delete;
+    EntityManager &operator=(const EntityManager &) = delete;
+    EntityManager(EntityManager &&) = delete;
+    EntityManager &operator=(EntityManager &&) = delete;
 };

@@ -21,6 +21,11 @@ Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_current
 
     m_vMin = vMin;
     m_vMax = vMax;
+
+    std::random_device rd;
+    m_gen = std::mt19937(rd());
+    m_rng = std::uniform_int_distribution<>(m_vMin, m_vMax);
+
     m_window = Window(width, height);
 
     std::string pathToVert = "shaders/polyplace.glsl";
@@ -38,11 +43,8 @@ Game::~Game()
 
 void Game::run()
 {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(m_vMin, m_vMax);
-    int randVert = dis(gen);
 
+    int randVert = m_rng(m_gen);
     double lastTime = glfwGetTime();
     double currTime;
 
@@ -55,7 +57,7 @@ void Game::run()
         if (currTime - lastTime >= 2)
         {
             lastTime = currTime;
-            randVert = dis(gen);
+            randVert = m_rng(m_gen);
         }
 
         m_renderer->Draw(3, glm::vec3(0.2f, 0.5f, 0.3f), glm::vec2(300, 100), -50 * glm::radians(currTime));

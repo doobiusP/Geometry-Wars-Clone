@@ -1,6 +1,6 @@
 #include "entitymanager.hpp"
 
-void EntityManager2::destroyID(size_t id)
+void EntityManager::destroyID(size_t id)
 {
     auto &ref = m_entityTagList[m_entityMap[id]->getTag()];
     ref.erase(std::remove(ref.begin(), ref.end(), id), ref.end());
@@ -9,11 +9,11 @@ void EntityManager2::destroyID(size_t id)
     m_entityMap.erase(id);
 }
 
-EntityManager2::EntityManager2() : m_totalEntities{0}
+EntityManager::EntityManager() : m_totalEntities{0}
 {
 }
 
-EntityManager2::~EntityManager2()
+EntityManager::~EntityManager()
 {
     m_entityTagList.clear();
     for (auto &e : m_entityMap)
@@ -24,7 +24,7 @@ EntityManager2::~EntityManager2()
     m_entityMap.clear();
 }
 
-const size_t EntityManager2::createEntity(ENTITY_TYPE tag)
+const size_t EntityManager::createEntity(ENTITY_TYPE tag)
 {
     Entity *newEntity{new Entity(++m_totalEntities, tag)};
 
@@ -34,12 +34,12 @@ const size_t EntityManager2::createEntity(ENTITY_TYPE tag)
     return m_totalEntities;
 }
 
-Entity *EntityManager2::getEntityByID(size_t id)
+Entity *EntityManager::getEntityByID(size_t id)
 {
     return m_entityMap.contains(id) ? m_entityMap[id] : nullptr;
 }
 
-void EntityManager2::update()
+void EntityManager::update()
 {
     std::vector<size_t> idsToDelete;
     for (const auto &e : m_entityMap)
@@ -53,7 +53,7 @@ void EntityManager2::update()
     }
 }
 
-const std::vector<size_t> &EntityManager2::getEntities(ENTITY_TYPE tag) const
+const std::vector<size_t> &EntityManager::getEntities(ENTITY_TYPE tag) const
 {
     return m_entityTagList.at(tag);
 }

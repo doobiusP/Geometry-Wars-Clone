@@ -13,7 +13,7 @@ enum class ENTITY_TYPE
 class Entity
 {
 private:
-    friend class EntityManager2;
+    friend class EntityManager;
 
     const size_t m_id;
     ENTITY_TYPE m_tag;
