@@ -17,9 +17,11 @@ struct CTransform
 struct CShape
 {
     int numSides;
-    glm::vec3 color;
+    float scale;
+    glm::vec4 color;
+    glm::vec4 outlineColor;
 
-    CShape(int s, const glm::vec3 &c) : numSides{s}, color{c}
+    CShape(int s, float sc, const glm::vec4 &c, const glm::vec4 &oc) : numSides{s}, scale{sc}, color{c}, outlineColor{oc}
     {
     }
 };

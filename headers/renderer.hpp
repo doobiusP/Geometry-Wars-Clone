@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "shaderclass.hpp"
+#include "entity.hpp"
 
 struct Polygon
 {
@@ -34,5 +35,6 @@ private:
 public:
     Renderer(int vMin, int vMax, float radius, float windowW, float windowH, const std::string &polyVertShader, const std::string &polyFragShader, const std::string &polyOutlineFragShader);
 
-    void Draw(int vCount, glm::vec3 polyColor, glm::vec2 polyPos, float rotAngle);
+    void Draw(int vCount, float rotAngle, const glm::vec4 &polyColor, const glm::vec2 &polyPos, const glm::vec2 &polyScale, const glm::vec4 &polyOutlineColor);
+    void DrawEntity(const Entity *entity);
 };

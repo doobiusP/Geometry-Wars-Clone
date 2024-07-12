@@ -55,5 +55,5 @@ void EntityManager::update()
 
 const std::vector<size_t> &EntityManager::getEntities(ENTITY_TYPE tag) const
 {
-    return m_entityTagList.at(tag);
+    return (m_entityTagList.contains(tag) && m_entityTagList.at(tag).size() >= 1) ? m_entityTagList.at(tag) : m_tempReturnList;
 }

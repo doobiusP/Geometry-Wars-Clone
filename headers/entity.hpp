@@ -28,8 +28,8 @@ public:
     std::optional<CLifespan> cLifespan;
     std::optional<CInput> cInput;
 
-    void addTransform(glm::vec2 p, glm::vec2 v, float a);
-    void addShape(int s, glm::vec3 c);
+    void addTransform(const glm::vec2 &p, const glm::vec2 &v, float a);
+    void addShape(int s, float sc, const glm::vec4 &c, const glm::vec4 &oc);
     void addCollision(float r);
     void addScore(int s);
     void addLifeSpan(int t);

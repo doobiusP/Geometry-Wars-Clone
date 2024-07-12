@@ -14,6 +14,8 @@ private:
     EntityTypeMap m_entityTagList;
     size_t m_totalEntities;
 
+    const std::vector<size_t> m_tempReturnList;
+
     void destroyID(size_t id);
 
 public:

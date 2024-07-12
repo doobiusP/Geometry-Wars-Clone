@@ -73,6 +73,7 @@ GENERATED += $(OBJDIR)/entity.o
 GENERATED += $(OBJDIR)/entitymanager.o
 GENERATED += $(OBJDIR)/game.o
 GENERATED += $(OBJDIR)/main.o
+GENERATED += $(OBJDIR)/randomgenerator.o
 GENERATED += $(OBJDIR)/renderer.o
 GENERATED += $(OBJDIR)/shaderclass.o
 GENERATED += $(OBJDIR)/window.o
@@ -80,6 +81,7 @@ OBJECTS += $(OBJDIR)/entity.o
 OBJECTS += $(OBJDIR)/entitymanager.o
 OBJECTS += $(OBJDIR)/game.o
 OBJECTS += $(OBJDIR)/main.o
+OBJECTS += $(OBJDIR)/randomgenerator.o
 OBJECTS += $(OBJDIR)/renderer.o
 OBJECTS += $(OBJDIR)/shaderclass.o
 OBJECTS += $(OBJDIR)/window.o
@@ -156,6 +158,9 @@ $(OBJDIR)/game.o: src/game.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/randomgenerator.o: src/randomgenerator.cpp
 	@echo "$(notdir $<)"
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/renderer.o: src/renderer.cpp

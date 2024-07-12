@@ -93,7 +93,7 @@ Renderer::Renderer(int vMin, int vMax, float radius, float windowW, float window
     glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE); // For outlining
 }
 
-void Renderer::Draw(int vCount, glm::vec3 polyColor, glm::vec2 polyPos, float rotAngle)
+void Renderer::Draw(int vCount, float rotAngle, const glm::vec4 &polyColor, const glm::vec2 &polyPos, const glm::vec2 &polyScale, const glm::vec4 &polyOutlineColor)
 {
     if (vCount < m_vStart || vCount >= m_vStart + m_vLength)
         return;
@@ -111,13 +111,14 @@ void Renderer::Draw(int vCount, glm::vec3 polyColor, glm::vec2 polyPos, float ro
 
     model = glm::translate(model, glm::vec3(polyPos, 0.0f));
     model = glm::rotate(model, rotAngle, glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::scale(model, glm::vec3(polyScale, 1.0f));
     model = glm::translate(model, glm::vec3(-m_windowW / 2, -m_windowH / 2, 0.0f));
 
     glm::mat4 polyMVP = m_orthoProj * model;
 
     m_shader.use();
     m_shader.setMat4("u_MVP", polyMVP);
-    m_shader.setVec3("u_polyColor", polyColor);
+    m_shader.setVec4("u_polyColor", polyColor);
 
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
     glStencilMask(0xFF);
@@ -129,13 +130,14 @@ void Renderer::Draw(int vCount, glm::vec3 polyColor, glm::vec2 polyPos, float ro
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(polyPos, 0.0f));
     model = glm::rotate(model, rotAngle, glm::vec3(0.0f, 0.0f, 1.0f));
-    model = glm::scale(model, glm::vec3(1.1f, 1.1f, 1.0f));
+    model = glm::scale(model, glm::vec3(polyScale + glm::vec2(0.1f, 0.1f), 1.0f));
     model = glm::translate(model, glm::vec3(-m_windowW / 2, -m_windowH / 2, 0.0f));
 
     polyMVP = m_orthoProj * model;
 
     m_outlineShader.use();
     m_outlineShader.setMat4("u_MVP", polyMVP);
+    m_outlineShader.setVec4("inOutlineColor", polyOutlineColor);
 
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
     glStencilMask(0x00);
@@ -146,4 +148,18 @@ void Renderer::Draw(int vCount, glm::vec3 polyColor, glm::vec2 polyPos, float ro
     glStencilMask(0xFF);
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
     glEnable(GL_DEPTH_TEST);
+}
+
+void Renderer::DrawEntity(const Entity *entity)
+{
+    int vCount = entity->cShape.value().numSides;
+    glm::vec4 polyColor = entity->cShape.value().color;
+    glm::vec4 polyOutlineColor = entity->cShape.value().outlineColor;
+    float scale = entity->cShape.value().scale;
+    glm::vec2 polyScale = glm::vec2(scale, scale);
+
+    float rotAngle = entity->cTransform.value().angle;
+    glm::vec2 polyPos = entity->cTransform.value().pos;
+
+    Draw(vCount, rotAngle, polyColor, polyPos, polyScale, polyOutlineColor);
 }

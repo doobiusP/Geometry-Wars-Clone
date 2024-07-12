@@ -4,14 +4,14 @@ Entity::Entity(const size_t id, const ENTITY_TYPE tag) : m_id{id}, m_tag{tag}, m
 {
 }
 
-void Entity::addTransform(glm::vec2 p, glm::vec2 v, float a)
+void Entity::addTransform(const glm::vec2 &p, const glm::vec2 &v, float a)
 {
     cTransform.emplace(p, v, a);
 }
 
-void Entity::addShape(int s, glm::vec3 c)
+void Entity::addShape(int s, float sc, const glm::vec4 &c, const glm::vec4 &oc)
 {
-    cShape.emplace(s, c);
+    cShape.emplace(s, sc, c, oc);
 }
 
 void Entity::addCollision(float r)
