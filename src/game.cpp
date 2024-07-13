@@ -5,7 +5,7 @@ Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_current
     std::ifstream config(pathToConfig);
     if (!config)
     {
-        std::cerr << "Failed to open config file: " << pathToConfig << std::endl;
+        LOG(std::cerr << "Failed to open config file: " << pathToConfig << std::endl;);
         std::exit(EXIT_FAILURE);
     }
 
@@ -48,7 +48,7 @@ Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_current
 
     if (config.fail())
     {
-        std::cerr << "Error reading config file: " << pathToConfig << std::endl;
+        LOG(std::cerr << "Error reading config file: " << pathToConfig << std::endl;);
         std::exit(EXIT_FAILURE);
     }
     config.close();
@@ -445,7 +445,7 @@ void Game::updateFPS(float deltaTime)
     {
         m_fps = m_frameCount / m_timeAccumulated;
 
-        std::cout << "FPS: " << m_fps << '\n';
+        LOG(std::cout << "FPS: " << m_fps << '\n';);
 
         m_frameCount = 0;
         m_timeAccumulated = 0.0f;

@@ -3,6 +3,7 @@
 #include "entitymanager.hpp"
 #include "renderer.hpp"
 #include "randomgenerator.hpp"
+#include "logger.hpp"
 
 #include <memory>
 
