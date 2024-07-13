@@ -1,0 +1,44 @@
+===================================== HOW TO INTERPRET config.txt ===============================================
+1.1 windowWidth             - width of the window
+1.2 windowHeight            - height of the window
+1.3 standardSpeed           - base speed w.r.t which factors are applied to
+1.4 standardRadius          - based radius w.r.t which factors are applied to
+1.5 vertexMin               - minimimum number of sides of any polygon
+1.6 vertexMax               - maximum number of sides of any polygon
+1.7 backgroundColor         - color of background
+
+2.1 smallEnemySpeedFactor   - small enemy speed factor, larger the factor, faster the smaller enemies
+2.2 smallEnemyRotationFactor- rotational speed, larger the factor, faster the spin
+2.3 smallEnemyRadiusFactor  - radius factor of small enemies
+2.4 smallEnemyLifespan      - lifespan in seconds
+2.5 smallEnemyOutlineColor  - outline color of small enemies
+
+3.1 bigEnemySpeedFactor     - big enemy speed factor, larger the factor, faster the larger enemies
+3.2 bigEnemyRotationFactor  - rotational speed, larger the factor, faster the spin
+3.3 bigEnemySpawnRate       - time interval in seconds before spawning a new enemy
+3.4 bigEnemyOutlineColor    - outline color of large enemies
+
+4.1 bulletSpeedFactor       - bullet speed factor
+4.2 bulletRotationFactor    - rotational speed, larger the factor, faster the spin
+4.3 bulletRadiusFactor      - radius factor of bullets
+4.4 bulletLifespan          - lifespan in seconds
+4.5 bulletSpawnLimit        - time interval in seconds before allowing to spawn a new bullet
+4.6 bulletColor             - bullet color
+4.7 bulletOutlineColor      - bullet outline color
+
+5.1 playerSpeedFactor       - speed factor of player
+5.2 playerRotationFactor    - rotational speed, larger the factor, faster the spin
+5.3 playerColor             - player polygon color
+5.4 playerOutlineColor      - player polygon outline color
+==============================================================================================================
+
+config.txt format:
+----------------------------
+1.1 1.2 1.3 1.4 1.5 1.6 1.7
+2.1 2.2 2.3 2.4 2.5
+3.1 3.2 3.3 3.4
+4.1 4.2 4.3 4.4 4.5 4.6 4.7
+5.1 5.2 5.3 5.4
+----------------------------
+
+* Note all colors are assumed to be 4-component RGB colors from 0-255

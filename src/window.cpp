@@ -21,6 +21,8 @@ GLFWwindow *Window::initializeWindow(const float windowW, const float windowH)
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_STENCIL_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     return window;
 }

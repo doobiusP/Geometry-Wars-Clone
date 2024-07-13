@@ -4,8 +4,48 @@
 #include "renderer.hpp"
 #include "randomgenerator.hpp"
 
-#include <random>
 #include <memory>
+
+struct GameConfig
+{
+    float g_windowWidth;
+    float g_windowHeight;
+    float g_standardSpeed;
+    float g_standardRadius;
+    int g_vertexMin;
+    int g_vertexMax;
+    glm::vec4 g_backgroundColor;
+};
+struct EnemyConfig
+{
+    float g_smallEnemySpeedFactor;
+    float g_smallEnemyRotationFactor;
+    float g_smallEnemyRadiusFactor;
+    int g_smallEnemyLifespan;
+    glm::vec4 g_smallEnemyOutlineColor;
+
+    float g_bigEnemySpeedFactor;
+    float g_bigEnemyRotationFactor;
+    int g_bigEnemySpawnRate;
+    glm::vec4 g_bigEnemyOutlineColor;
+};
+struct BulletConfig
+{
+    float g_bulletSpeedFactor;
+    float g_bulletRotationFactor;
+    float g_bulletRadiusFactor;
+    int g_bulletLifespan;
+    int g_bulletSpawnLimit;
+    glm::vec4 g_bulletColor;
+    glm::vec4 g_bulletOutlineColor;
+};
+struct PlayerConfig
+{
+    float g_playerSpeedFactor;
+    float g_playerRotationFactor;
+    glm::vec4 g_playerColor;
+    glm::vec4 g_playerOutlineColor;
+};
 
 class Game
 {
@@ -16,10 +56,15 @@ public:
 private:
     Window m_window;
     EntityManager m_manager;
-    std::unique_ptr<Renderer> m_renderer; // Default constructor and copy assignment of Renderer is implicitly deleted, so having to use unique_ptr...
+    std::unique_ptr<Renderer> m_renderer; // Renderer needs data from config.txt and no default constructor; unique_ptr for delayed construction
     RandomGenerator m_rg;
-    std::vector<size_t> m_enemiesDestroyedThisFrame;
 
+    GameConfig m_gConfig;
+    EnemyConfig m_eConfig;
+    BulletConfig m_bConfig;
+    PlayerConfig m_pConfig;
+
+    std::vector<size_t> m_enemiesDestroyedThisFrame;
     size_t m_playerID;
 
     int m_score;
@@ -30,15 +75,6 @@ private:
 
     bool m_spaceKeyPressed;
     bool m_paused;
-
-    int m_vMin;
-    int m_vMax;
-
-    float m_windowW;
-    float m_windowH;
-
-    float m_standardSpeed;
-    float m_standardRadius;
 
     int m_frameCount;
     float m_timeAccumulated;
