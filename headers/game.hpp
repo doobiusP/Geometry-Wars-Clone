@@ -18,6 +18,7 @@ private:
     EntityManager m_manager;
     std::unique_ptr<Renderer> m_renderer; // Default constructor and copy assignment of Renderer is implicitly deleted, so having to use unique_ptr...
     RandomGenerator m_rg;
+    std::vector<size_t> m_enemiesDestroyedThisFrame;
 
     size_t m_playerID;
 
@@ -28,7 +29,6 @@ private:
     float m_lastBulletSpawnTime;
 
     bool m_spaceKeyPressed;
-
     bool m_paused;
 
     int m_vMin;
@@ -39,6 +39,10 @@ private:
 
     float m_standardSpeed;
     float m_standardRadius;
+
+    int m_frameCount;
+    float m_timeAccumulated;
+    float m_fps;
 
     // ------------------------------------ Systems/Methods ------------------------------------ //
 
@@ -57,6 +61,7 @@ private:
     void spawnBullet(const glm::vec2 &mousePos);
 
     bool checkCollision(size_t id1, size_t id2);
+    void updateFPS(float deltaTime);
 
     static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
     void handleKeyPress(int key, int action);

@@ -1,6 +1,6 @@
 #include "game.hpp"
 
-Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_currentFrame{0}, m_lastEnemySpawnTime{0}, m_lastBulletSpawnTime{0}, m_paused{0}, m_spaceKeyPressed{0}
+Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_currentFrame{0}, m_lastEnemySpawnTime{0}, m_lastBulletSpawnTime{0}, m_paused{0}, m_spaceKeyPressed{0}, m_fps{0}, m_frameCount{0}, m_timeAccumulated{0}
 {
     std::ifstream config(pathToConfig);
     if (!config)
@@ -34,12 +34,6 @@ Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_current
 
 void Game::run()
 {
-    spawnEnemy();
-    spawnEnemy();
-    spawnEnemy();
-    spawnEnemy();
-    spawnEnemy();
-    spawnEnemy();
     float lastTime = static_cast<float>(glfwGetTime());
     float currTime, deltaTime;
 
@@ -55,9 +49,13 @@ void Game::run()
             sUserInput();
             sMovement(deltaTime);
             sCollision();
+            sEnemySpawner();
+            sLifespan();
         }
 
         sRender();
+
+        updateFPS(deltaTime);
         glfwPollEvents();
         ++m_currentFrame;
     }
@@ -79,15 +77,23 @@ void Game::sMovement(float deltaTime)
     for (size_t enemyID : enemies)
     {
         Entity *enemy = m_manager.getEntityByID(enemyID);
-        enemy->cTransform.value().pos = enemy->cTransform.value().pos + (m_standardSpeed * deltaTime * enemy->cTransform.value().vel);
-        enemy->cTransform.value().angle += 3 * deltaTime;
+        if (enemy->cLifespan.has_value())
+        {
+            enemy->cTransform.value().pos = enemy->cTransform.value().pos + (1.5f * m_standardSpeed * deltaTime * enemy->cTransform.value().vel);
+            enemy->cTransform.value().angle += 7 * deltaTime;
+        }
+        else
+        {
+            enemy->cTransform.value().pos = enemy->cTransform.value().pos + (m_standardSpeed * deltaTime * enemy->cTransform.value().vel);
+            enemy->cTransform.value().angle += 5 * deltaTime;
+        }
     }
 
     for (size_t bulletID : bullets)
     {
         Entity *bullet = m_manager.getEntityByID(bulletID);
         bullet->cTransform.value().pos = bullet->cTransform.value().pos + (4.5f * m_standardSpeed * deltaTime * bullet->cTransform.value().vel);
-        bullet->cTransform.value().angle += 5 * deltaTime;
+        bullet->cTransform.value().angle += 6 * deltaTime;
     }
 
     Entity *player = m_manager.getEntityByID(m_playerID);
@@ -153,6 +159,49 @@ void Game::sUserInput()
     }
 }
 
+void Game::sLifespan()
+{
+    auto &enemies = m_manager.getEntities(ENTITY_TYPE::ENEMY);
+    auto &bullets = m_manager.getEntities(ENTITY_TYPE::BULLET);
+
+    for (auto enemy : enemies)
+    {
+        Entity *enemyE = m_manager.getEntityByID(enemy);
+        if (enemyE->cLifespan.has_value())
+        {
+            CLifespan &lf = enemyE->cLifespan.value();
+            CShape &sh = enemyE->cShape.value();
+
+            --lf.remaining;
+            float frac = static_cast<float>(lf.remaining) / lf.total;
+            sh.color.w = frac;
+            sh.outlineColor.w = frac;
+
+            if (lf.remaining == 0)
+            {
+                enemyE->destroy();
+            }
+        }
+    }
+
+    for (auto bullet : bullets)
+    {
+        Entity *bulletE = m_manager.getEntityByID(bullet);
+        CLifespan &lf = bulletE->cLifespan.value();
+        CShape &sh = bulletE->cShape.value();
+
+        --lf.remaining;
+        float frac = static_cast<float>(lf.remaining) / lf.total;
+        sh.color.w = frac;
+        sh.outlineColor.w = frac;
+
+        if (lf.remaining == 0)
+        {
+            bulletE->destroy();
+        }
+    }
+}
+
 void Game::sRender()
 {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -176,6 +225,22 @@ void Game::sRender()
     glfwSwapBuffers(m_window.window);
 }
 
+void Game::sEnemySpawner()
+{
+    if (m_currentFrame - m_lastEnemySpawnTime >= 50)
+    {
+        spawnEnemy();
+        m_lastEnemySpawnTime = m_currentFrame;
+    }
+
+    for (auto enemy : m_enemiesDestroyedThisFrame)
+    {
+        spawnSmallEnemies(enemy);
+    }
+
+    m_enemiesDestroyedThisFrame.clear();
+}
+
 void Game::sCollision()
 {
     auto &enemies = m_manager.getEntities(ENTITY_TYPE::ENEMY);
@@ -188,7 +253,6 @@ void Game::sCollision()
             // Game over mechanics -- TODO
             CTransform &playerMov = m_manager.getEntityByID(m_playerID)->cTransform.value();
             playerMov.pos = glm::vec2(m_windowW / 2, m_windowH / 2);
-            m_manager.getEntityByID(enemyID)->destroy();
         }
 
         for (auto bulletID : bullets)
@@ -197,6 +261,9 @@ void Game::sCollision()
             {
                 m_manager.getEntityByID(enemyID)->destroy();
                 m_manager.getEntityByID(bulletID)->destroy();
+
+                if (!m_manager.getEntityByID(enemyID)->cLifespan.has_value())
+                    m_enemiesDestroyedThisFrame.push_back(enemyID);
             }
         }
     }
@@ -271,6 +338,35 @@ void Game::spawnEnemy()
     enemy->addCollision(m_standardRadius);
 }
 
+void Game::spawnSmallEnemies(size_t enemy_id)
+{
+    Entity *baseEnemy = m_manager.getEntityByID(enemy_id);
+
+    int baseVCount = baseEnemy->cShape.value().numSides;
+    glm::vec4 baseColor = baseEnemy->cShape.value().color;
+    glm::vec2 basePos = baseEnemy->cTransform.value().pos;
+    float baseR = baseEnemy->cCollision.value().radius;
+
+    const float PI = glm::pi<float>();
+
+    glm::vec4 outlineColor = glm::vec4(0.8f, 0.2f, 0.2f, 1.0f);
+
+    for (int i = 0; i < baseVCount; ++i)
+    {
+        size_t smallEnemyID = m_manager.createEntity(ENTITY_TYPE::ENEMY);
+        Entity *smallEnemy = m_manager.getEntityByID(smallEnemyID);
+
+        float angle = (2.0f * PI / baseVCount) * i;
+        glm::vec2 vel = glm::vec2(cos(angle), sin(angle));
+        glm::vec2 pos = basePos + (1.33f * baseR * vel);
+
+        smallEnemy->addTransform(pos, vel, 0.0f);
+        smallEnemy->addShape(baseVCount, 0.33f, baseColor, outlineColor);
+        smallEnemy->addCollision(0.33f * m_standardRadius);
+        smallEnemy->addLifeSpan(25);
+    }
+}
+
 void Game::spawnBullet(const glm::vec2 &mousePos)
 {
     size_t bulletID = m_manager.createEntity(ENTITY_TYPE::BULLET);
@@ -285,6 +381,7 @@ void Game::spawnBullet(const glm::vec2 &mousePos)
     bullet->addTransform(correctPos, bulletVel, 0.0f);
     bullet->addShape(m_vMax, 0.2f, glm::vec4(0.3f, 0.2f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     bullet->addCollision(0.2f * m_standardRadius);
+    bullet->addLifeSpan(40);
 }
 
 bool Game::checkCollision(size_t id1, size_t id2)
@@ -293,6 +390,22 @@ bool Game::checkCollision(size_t id1, size_t id2)
     Entity *e2 = m_manager.getEntityByID(id2);
 
     return glm::distance(e1->cTransform.value().pos, e2->cTransform.value().pos) <= 2 * m_standardRadius;
+}
+
+void Game::updateFPS(float deltaTime)
+{
+    ++m_frameCount;
+    m_timeAccumulated += deltaTime;
+
+    if (m_timeAccumulated >= 1.0f)
+    {
+        m_fps = m_frameCount / m_timeAccumulated;
+
+        std::cout << "FPS: " << m_fps << '\n';
+
+        m_frameCount = 0;
+        m_timeAccumulated = 0.0f;
+    }
 }
 
 void Game::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
