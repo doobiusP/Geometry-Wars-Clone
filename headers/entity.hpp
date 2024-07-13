@@ -32,7 +32,7 @@ public:
     void addShape(int s, float sc, const glm::vec4 &c, const glm::vec4 &oc);
     void addCollision(float r);
     void addScore(int s);
-    void addLifeSpan(int t);
+    void addLifeSpan(float t);
     void addInput();
 
     const size_t getId() const;

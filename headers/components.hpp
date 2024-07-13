@@ -46,10 +46,10 @@ struct CScore
 
 struct CLifespan
 {
-    int remaining;
-    int total;
+    float remaining;
+    float total;
 
-    CLifespan(int t) : remaining{t}, total{t}
+    CLifespan(float t) : remaining{t}, total{t}
     {
     }
 };

@@ -21,12 +21,12 @@ struct EnemyConfig
     float g_smallEnemySpeedFactor;
     float g_smallEnemyRotationFactor;
     float g_smallEnemyRadiusFactor;
-    int g_smallEnemyLifespan;
+    float g_smallEnemyLifespan;
     glm::vec4 g_smallEnemyOutlineColor;
 
     float g_bigEnemySpeedFactor;
     float g_bigEnemyRotationFactor;
-    int g_bigEnemySpawnRate;
+    float g_bigEnemySpawnRate;
     glm::vec4 g_bigEnemyOutlineColor;
 };
 struct BulletConfig
@@ -34,8 +34,8 @@ struct BulletConfig
     float g_bulletSpeedFactor;
     float g_bulletRotationFactor;
     float g_bulletRadiusFactor;
-    int g_bulletLifespan;
-    int g_bulletSpawnLimit;
+    float g_bulletLifespan;
+    float g_bulletSpawnLimit;
     glm::vec4 g_bulletColor;
     glm::vec4 g_bulletOutlineColor;
 };
@@ -70,6 +70,7 @@ private:
     int m_score;
 
     int m_currentFrame;
+    float m_currentTime;
     float m_lastEnemySpawnTime;
     float m_lastBulletSpawnTime;
 
@@ -86,7 +87,7 @@ private:
 
     void sMovement(float deltaTime);
     void sUserInput();
-    void sLifespan();
+    void sLifespan(float deltaTime);
     void sRender();
     void sEnemySpawner();
     void sCollision();

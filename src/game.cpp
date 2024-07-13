@@ -1,6 +1,6 @@
 #include "game.hpp"
 
-Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_currentFrame{0}, m_lastEnemySpawnTime{0}, m_lastBulletSpawnTime{0}, m_paused{0}, m_spaceKeyPressed{0}, m_fps{0}, m_frameCount{0}, m_timeAccumulated{0}
+Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_currentFrame{0}, m_lastEnemySpawnTime{0}, m_lastBulletSpawnTime{0}, m_paused{0}, m_spaceKeyPressed{0}, m_fps{0}, m_frameCount{0}, m_timeAccumulated{0}, m_currentTime{0}
 {
     std::ifstream config(pathToConfig);
     if (!config)
@@ -71,14 +71,13 @@ Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_current
 void Game::run()
 {
     float lastTime = static_cast<float>(glfwGetTime());
-    float currTime;
     float deltaTime;
 
     while (!glfwWindowShouldClose(m_window.window))
     {
-        currTime = static_cast<float>(glfwGetTime());
-        deltaTime = currTime - lastTime;
-        lastTime = currTime;
+        m_currentTime = static_cast<float>(glfwGetTime());
+        deltaTime = m_currentTime - lastTime;
+        lastTime = m_currentTime;
 
         m_manager.update();
         if (!m_paused)
@@ -87,7 +86,7 @@ void Game::run()
             sMovement(deltaTime);
             sCollision();
             sEnemySpawner();
-            sLifespan();
+            sLifespan(deltaTime);
         }
         sRender();
         updateFPS(deltaTime);
@@ -183,18 +182,18 @@ void Game::sUserInput()
     {
         playerInp.right = 1;
     }
-    if (m_spaceKeyPressed && m_currentFrame - m_lastBulletSpawnTime >= m_bConfig.g_bulletSpawnLimit)
+    if (m_spaceKeyPressed && m_currentTime - m_lastBulletSpawnTime >= m_bConfig.g_bulletSpawnLimit)
     {
         double xpos, ypos;
         glfwGetCursorPos(m_window.window, &xpos, &ypos);
         spawnBullet(glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos)));
 
-        m_lastBulletSpawnTime = m_currentFrame;
+        m_lastBulletSpawnTime = m_currentTime;
         m_spaceKeyPressed = 0;
     }
 }
 
-void Game::sLifespan()
+void Game::sLifespan(float deltaTime)
 {
     auto &enemies = m_manager.getEntities(ENTITY_TYPE::ENEMY);
     auto &bullets = m_manager.getEntities(ENTITY_TYPE::BULLET);
@@ -205,16 +204,18 @@ void Game::sLifespan()
         if (enemyE->cLifespan.has_value())
         {
             CLifespan &lf = enemyE->cLifespan.value();
-            CShape &sh = enemyE->cShape.value();
 
-            --lf.remaining;
-            float frac = static_cast<float>(lf.remaining) / lf.total;
-            sh.color.a = frac;
-            sh.outlineColor.a = frac;
-
-            if (lf.remaining == 0)
+            lf.remaining -= deltaTime;
+            if (lf.remaining <= 0)
             {
                 enemyE->destroy();
+            }
+            else
+            {
+                CShape &sh = enemyE->cShape.value();
+                float frac = lf.remaining / lf.total;
+                sh.color.a = frac;
+                sh.outlineColor.a = frac;
             }
         }
     }
@@ -223,18 +224,18 @@ void Game::sLifespan()
     {
         Entity *bulletE = m_manager.getEntityByID(bullet);
         CLifespan &lf = bulletE->cLifespan.value();
-        CShape &sh = bulletE->cShape.value();
 
-        --lf.remaining;
-        float frac = static_cast<float>(lf.remaining) / lf.total;
-        sh.color.a = frac;
-        sh.outlineColor.a = frac;
-
-        // std::cout << "For bullet " << bullet << ", its frac = " << frac << '\n';
-
-        if (lf.remaining == 0)
+        lf.remaining -= deltaTime;
+        if (lf.remaining <= 0)
         {
             bulletE->destroy();
+        }
+        else
+        {
+            CShape &sh = bulletE->cShape.value();
+            float frac = lf.remaining / lf.total;
+            sh.color.a = frac;
+            sh.outlineColor.a = frac;
         }
     }
 }
@@ -265,10 +266,10 @@ void Game::sRender()
 
 void Game::sEnemySpawner()
 {
-    if (m_currentFrame - m_lastEnemySpawnTime >= m_eConfig.g_bigEnemySpawnRate)
+    if (m_currentTime - m_lastEnemySpawnTime >= m_eConfig.g_bigEnemySpawnRate)
     {
         spawnEnemy();
-        m_lastEnemySpawnTime = m_currentFrame;
+        m_lastEnemySpawnTime = m_currentTime;
     }
 
     for (auto enemyID : m_enemiesDestroyedThisFrame)

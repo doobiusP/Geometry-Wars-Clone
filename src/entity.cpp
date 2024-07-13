@@ -24,7 +24,7 @@ void Entity::addScore(int s)
     cScore.emplace(s);
 }
 
-void Entity::addLifeSpan(int t)
+void Entity::addLifeSpan(float t)
 {
     cLifespan.emplace(t);
 }
