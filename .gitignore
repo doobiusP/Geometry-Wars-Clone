@@ -1,9 +1,9 @@
-
 bin/
 obj/
 .vscode
-Makefile
 *.make
 TODO.txt
 **.lib
 **.a
+Makefile
+Geometry_Game.make
