@@ -1,6 +1,6 @@
 #include "game.hpp"
 
-Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_currentFrame{0}, m_lastEnemySpawnTime{0}, m_lastBulletSpawnTime{0}, m_paused{0}, m_spaceKeyPressed{0}, m_fps{0}, m_frameCount{0}, m_timeAccumulated{0}, m_currentTime{0}, m_numBigEnemies{0}, m_maxScore{0}
+Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_currentFrame{0}, m_lastEnemySpawnTime{0}, m_lastBulletSpawnTime{0}, m_paused{0}, m_spaceKeyPressed{0}, m_fps{0}, m_frameCount{0}, m_timeAccumulated{0}, m_currentTime{0}, m_numBigEnemies{0}, m_maxScore{0}, m_lastSpecialMoveUseTime{0}
 {
     std::ifstream config(pathToConfig);
     if (!config)
@@ -39,7 +39,7 @@ Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_current
     m_bConfig.g_bulletOutlineColor /= 255.0f;
 
     // Player Config
-    config >> m_pConfig.g_playerSpeedFactor >> m_pConfig.g_playerRotationFactor >>
+    config >> m_pConfig.g_playerSpeedFactor >> m_pConfig.g_playerRotationFactor >> m_pConfig.g_playerSMTimeLimit >>
         m_pConfig.g_playerColor.r >> m_pConfig.g_playerColor.g >> m_pConfig.g_playerColor.b >> m_pConfig.g_playerColor.a >>
         m_pConfig.g_playerOutlineColor.r >> m_pConfig.g_playerOutlineColor.g >> m_pConfig.g_playerOutlineColor.b >> m_pConfig.g_playerOutlineColor.a;
 
@@ -477,6 +477,26 @@ void Game::gameOver()
     }
 }
 
+void Game::doSpecialMove()
+{
+    if (m_currentTime - m_lastSpecialMoveUseTime >= m_pConfig.g_playerSMTimeLimit)
+    {
+        m_lastSpecialMoveUseTime = m_currentTime;
+        Entity *player = m_manager.getEntityByID(m_playerID);
+        float r = player->cCollision.value().radius;
+        glm::vec2 playerPos = player->cTransform.value().pos;
+
+        const float PI = glm::pi<float>();
+        for (int i = 0; i < 15; ++i)
+        {
+            float angle = (2.0f * PI / 15) * i;
+            glm::vec2 dir = playerPos + r * glm::vec2(cos(angle), sin(angle));
+
+            spawnBullet(dir);
+        }
+    }
+}
+
 void Game::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
     Game *game = static_cast<Game *>(glfwGetWindowUserPointer(window));
@@ -504,6 +524,13 @@ void Game::handleKeyPress(int key, int action)
         if (action == GLFW_PRESS)
         {
             togglePause();
+        }
+    }
+    if (key == GLFW_KEY_R)
+    {
+        if (action == GLFW_PRESS)
+        {
+            doSpecialMove();
         }
     }
 }

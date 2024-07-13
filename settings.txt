@@ -29,8 +29,9 @@
 
 5.1 playerSpeedFactor       - speed factor of player
 5.2 playerRotationFactor    - rotational speed, larger the factor, faster the spin
-5.3 playerColor             - player polygon color
-5.4 playerOutlineColor      - player polygon outline color
+5.3 playerSMTimeLimit       - time interval in seconds before being able to cast special move again
+5.4 playerColor             - player polygon color
+5.5 playerOutlineColor      - player polygon outline color
 ==============================================================================================================
 
 config.txt format:
@@ -39,7 +40,7 @@ config.txt format:
 2.1 2.2 2.3 2.4 2.5
 3.1 3.2 3.3 3.4
 4.1 4.2 4.3 4.4 4.5 4.6 4.7
-5.1 5.2 5.3 5.4
+5.1 5.2 5.3 5.4 5.5
 ----------------------------
 
 * Note all colors are assumed to be 4-component RGB colors from 0-255

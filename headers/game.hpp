@@ -45,6 +45,7 @@ struct PlayerConfig
 {
     float g_playerSpeedFactor;
     float g_playerRotationFactor;
+    float g_playerSMTimeLimit;
     glm::vec4 g_playerColor;
     glm::vec4 g_playerOutlineColor;
 };
@@ -74,9 +75,11 @@ private:
     int m_maxScore;
 
     int m_currentFrame;
+
     float m_currentTime;
     float m_lastEnemySpawnTime;
     float m_lastBulletSpawnTime;
+    float m_lastSpecialMoveUseTime;
 
     bool m_spaceKeyPressed;
     bool m_paused;
@@ -104,6 +107,7 @@ private:
     bool checkCollision(size_t id1, size_t id2);
     void updateFPS(float deltaTime);
     void gameOver();
+    void doSpecialMove();
 
     static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
     void handleKeyPress(int key, int action);
