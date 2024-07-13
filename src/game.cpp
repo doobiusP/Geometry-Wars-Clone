@@ -1,6 +1,6 @@
 #include "game.hpp"
 
-Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_currentFrame{0}, m_lastEnemySpawnTime{0}, m_lastBulletSpawnTime{0}, m_paused{0}, m_spaceKeyPressed{0}, m_fps{0}, m_frameCount{0}, m_timeAccumulated{0}, m_currentTime{0}
+Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_currentFrame{0}, m_lastEnemySpawnTime{0}, m_lastBulletSpawnTime{0}, m_paused{0}, m_spaceKeyPressed{0}, m_fps{0}, m_frameCount{0}, m_timeAccumulated{0}, m_currentTime{0}, m_numBigEnemies{0}
 {
     std::ifstream config(pathToConfig);
     if (!config)
@@ -12,7 +12,8 @@ Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_current
     // Game Config
     config >> m_gConfig.g_windowWidth >> m_gConfig.g_windowHeight >>
         m_gConfig.g_standardSpeed >> m_gConfig.g_standardRadius >> m_gConfig.g_vertexMin >> m_gConfig.g_vertexMax >>
-        m_gConfig.g_backgroundColor.r >> m_gConfig.g_backgroundColor.g >> m_gConfig.g_backgroundColor.b >> m_gConfig.g_backgroundColor.a;
+        m_gConfig.g_maxBigEnemies >> m_gConfig.g_backgroundColor.r >> m_gConfig.g_backgroundColor.g >>
+        m_gConfig.g_backgroundColor.b >> m_gConfig.g_backgroundColor.a;
 
     m_gConfig.g_backgroundColor /= 255.0f;
 
@@ -266,7 +267,7 @@ void Game::sRender()
 
 void Game::sEnemySpawner()
 {
-    if (m_currentTime - m_lastEnemySpawnTime >= m_eConfig.g_bigEnemySpawnRate)
+    if (m_numBigEnemies < m_gConfig.g_maxBigEnemies && m_currentTime - m_lastEnemySpawnTime >= m_eConfig.g_bigEnemySpawnRate)
     {
         spawnEnemy();
         m_lastEnemySpawnTime = m_currentTime;
@@ -274,6 +275,7 @@ void Game::sEnemySpawner()
 
     for (auto enemyID : m_enemiesDestroyedThisFrame)
     {
+        --m_numBigEnemies;
         spawnSmallEnemies(enemyID);
     }
 
@@ -368,13 +370,18 @@ void Game::spawnPlayer()
 
 void Game::spawnEnemy()
 {
+    ++m_numBigEnemies;
     size_t enemyID = m_manager.createEntity(ENTITY_TYPE::ENEMY);
     Entity *enemy = m_manager.getEntityByID(enemyID);
-    glm::vec2 currPos = m_rg.generateCoordinates();
 
-    enemy->addTransform(currPos, glm::normalize(currPos - m_rg.generateCoordinates()), 0.0f);
-    enemy->addShape(m_rg.generateVertex(), 1.0f, m_rg.generateColor(), m_eConfig.g_bigEnemyOutlineColor);
     enemy->addCollision(m_gConfig.g_standardRadius);
+    enemy->addShape(m_rg.generateVertex(), 1.0f, m_rg.generateColor(), m_eConfig.g_bigEnemyOutlineColor);
+
+    do
+    {
+        glm::vec2 currPos = m_rg.generateCoordinates();
+        enemy->addTransform(currPos, glm::normalize(currPos - m_rg.generateCoordinates()), 0.0f);
+    } while (checkCollision(m_playerID, enemyID));
 }
 
 void Game::spawnSmallEnemies(size_t enemy_id)

@@ -5,7 +5,8 @@
 1.4 standardRadius          - based radius w.r.t which factors are applied to
 1.5 vertexMin               - minimimum number of sides of any polygon
 1.6 vertexMax               - maximum number of sides of any polygon
-1.7 backgroundColor         - color of background
+1.7 maxBigEnemies           - maximum number of big enemies that can be spawned at any time
+1.8 backgroundColor         - color of background
 
 2.1 smallEnemySpeedFactor   - small enemy speed factor, larger the factor, faster the smaller enemies
 2.2 smallEnemyRotationFactor- rotational speed, larger the factor, faster the spin
@@ -34,7 +35,7 @@
 
 config.txt format:
 ----------------------------
-1.1 1.2 1.3 1.4 1.5 1.6 1.7
+1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8
 2.1 2.2 2.3 2.4 2.5
 3.1 3.2 3.3 3.4
 4.1 4.2 4.3 4.4 4.5 4.6 4.7

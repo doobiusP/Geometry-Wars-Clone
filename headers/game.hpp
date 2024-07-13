@@ -14,6 +14,7 @@ struct GameConfig
     float g_standardRadius;
     int g_vertexMin;
     int g_vertexMax;
+    int g_maxBigEnemies;
     glm::vec4 g_backgroundColor;
 };
 struct EnemyConfig
@@ -65,6 +66,7 @@ private:
     PlayerConfig m_pConfig;
 
     std::vector<size_t> m_enemiesDestroyedThisFrame;
+    int m_numBigEnemies;
     size_t m_playerID;
 
     int m_score;
