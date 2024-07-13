@@ -1,6 +1,6 @@
 #include "game.hpp"
 
-Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_currentFrame{0}, m_lastEnemySpawnTime{0}, m_lastBulletSpawnTime{0}, m_paused{0}, m_spaceKeyPressed{0}, m_fps{0}, m_frameCount{0}, m_timeAccumulated{0}, m_currentTime{0}, m_numBigEnemies{0}
+Game::Game(const std::string &pathToConfig) : m_manager{}, m_score{0}, m_currentFrame{0}, m_lastEnemySpawnTime{0}, m_lastBulletSpawnTime{0}, m_paused{0}, m_spaceKeyPressed{0}, m_fps{0}, m_frameCount{0}, m_timeAccumulated{0}, m_currentTime{0}, m_numBigEnemies{0}, m_maxScore{0}
 {
     std::ifstream config(pathToConfig);
     if (!config)
@@ -291,15 +291,14 @@ void Game::sCollision()
     {
         if (checkCollision(m_playerID, enemyID))
         {
-            // Game over mechanics -- TODO
-            CTransform &playerMov = m_manager.getEntityByID(m_playerID)->cTransform.value();
-            playerMov.pos = glm::vec2(m_gConfig.g_windowWidth / 2, m_gConfig.g_windowHeight / 2);
+            gameOver();
         }
 
         for (auto bulletID : bullets)
         {
             if (checkCollision(bulletID, enemyID))
             {
+                m_score += m_manager.getEntityByID(enemyID)->cScore.value().score;
                 m_manager.getEntityByID(enemyID)->destroy();
                 m_manager.getEntityByID(bulletID)->destroy();
 
@@ -376,7 +375,7 @@ void Game::spawnEnemy()
 
     enemy->addCollision(m_gConfig.g_standardRadius);
     enemy->addShape(m_rg.generateVertex(), 1.0f, m_rg.generateColor(), m_eConfig.g_bigEnemyOutlineColor);
-
+    enemy->addScore(1000);
     do
     {
         glm::vec2 currPos = m_rg.generateCoordinates();
@@ -408,6 +407,7 @@ void Game::spawnSmallEnemies(size_t enemy_id)
         smallEnemy->addShape(baseVCount, m_eConfig.g_smallEnemyRadiusFactor, baseColor, m_eConfig.g_smallEnemyOutlineColor);
         smallEnemy->addCollision(m_eConfig.g_smallEnemyRadiusFactor * m_gConfig.g_standardRadius);
         smallEnemy->addLifeSpan(m_eConfig.g_smallEnemyLifespan);
+        smallEnemy->addScore(1000 / baseVCount);
     }
 }
 
@@ -449,6 +449,31 @@ void Game::updateFPS(float deltaTime)
 
         m_frameCount = 0;
         m_timeAccumulated = 0.0f;
+    }
+}
+
+void Game::gameOver()
+{
+    CTransform &playerMov = m_manager.getEntityByID(m_playerID)->cTransform.value();
+    playerMov.pos = glm::vec2(m_gConfig.g_windowWidth / 2, m_gConfig.g_windowHeight / 2);
+    m_maxScore = std::max(m_maxScore, m_score);
+
+    std::cout << "+====================================================+\n";
+    std::cout << "CURRENT SCORE : " << m_score << ", MAX SCORE : " << m_maxScore << '\n';
+    std::cout << "+====================================================+\n";
+
+    m_score = 0;
+    auto &enemies = m_manager.getEntities(ENTITY_TYPE::ENEMY);
+    auto &bullets = m_manager.getEntities(ENTITY_TYPE::BULLET);
+
+    for (size_t enemyID : enemies)
+    {
+        m_manager.getEntityByID(enemyID)->destroy();
+    }
+
+    for (size_t bulletID : bullets)
+    {
+        m_manager.getEntityByID(bulletID)->destroy();
     }
 }
 

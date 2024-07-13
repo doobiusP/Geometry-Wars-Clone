@@ -71,6 +71,7 @@ private:
     size_t m_playerID;
 
     int m_score;
+    int m_maxScore;
 
     int m_currentFrame;
     float m_currentTime;
@@ -102,6 +103,7 @@ private:
 
     bool checkCollision(size_t id1, size_t id2);
     void updateFPS(float deltaTime);
+    void gameOver();
 
     static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
     void handleKeyPress(int key, int action);
